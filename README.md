@@ -12,7 +12,7 @@ Karen Cochrane and David Han - Edited by Jenny South
 
 ## Description
 
-This is the week 6 sidequest where I am are working to learn how to implement sprite sheets and tilesets into p5.js
+This is the week 6 sidequest edited for week 9 where I am working to add a debugging screen.
 
 ---
 
@@ -20,9 +20,7 @@ This is the week 6 sidequest where I am are working to learn how to implement sp
 
 Learning Goals:
 
-- implement sprite sheets
-- implement tile sets
-- add sounds
+- implement debugging screen into the week 6 sidequest
 
 ---
 
