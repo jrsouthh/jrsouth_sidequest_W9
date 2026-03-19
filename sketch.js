@@ -30,10 +30,10 @@ let playerImg;
 let debugOpen = false;
 let debugIndex = 0;
 const DEBUG_ITEMS = [
-  { label: "Show Boar Probes", key: "showProbes", value: false },
-  { label: "Show Collision Boxes", key: "showColliders", value: false },
-  { label: "Player Invincible", key: "invincible", value: false },
-  { label: "Win Condition = 1", key: "easyWin", value: false },
+  { label: "Boar Probes", key: "showProbes", value: false },
+  { label: "Colliders", key: "showColliders", value: false },
+  { label: "Invincible", key: "invincible", value: false },
+  { label: "Win Score=1", key: "easyWin", value: false },
 ];
 
 // --- SOUNDS ---
@@ -220,7 +220,7 @@ const FONT_COLS = 19;
 const FONT_ROWS = 5;
 const CELL = 30;
 
-const FONT_SCALE = 1 / 3;
+const FONT_SCALE = 0.3;
 const GLYPH_W = CELL * FONT_SCALE;
 const GLYPH_H = CELL * FONT_SCALE;
 
@@ -1377,22 +1377,19 @@ function drawDebugMenu() {
 
   const PAD = 6;
   const ROW = GLYPH_H + 5;
-  const W = 150;
-  const H = PAD * 2 + DEBUG_ITEMS.length * ROW + ROW; // +ROW for title
+  const W = VIEWW - 20;
+  const H = PAD * 2 + DEBUG_ITEMS.length * ROW + ROW;
   const X = Math.round((VIEWW - W) / 2);
   const Y = Math.round((VIEWH - H) / 2);
 
-  // semi-transparent panel
   push();
   noStroke();
   fill(0, 0, 0, 160);
   rect(X, Y, W, H, 3);
   pop();
 
-  // title
   drawOutlinedTextToGfx(window, "DEBUG MENU", X + PAD, Y + PAD, "#ffdc00");
 
-  // items
   for (let i = 0; i < DEBUG_ITEMS.length; i++) {
     const item = DEBUG_ITEMS[i];
     const iy = Y + PAD + ROW + i * ROW;
