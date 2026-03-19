@@ -1,6 +1,6 @@
 ## Project Title
 
-Week 06 Sidequest - Sprite Sheets and Tiles
+Week 09 Sidequest - Debugging
 
 ---
 
