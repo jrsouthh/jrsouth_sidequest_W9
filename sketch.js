@@ -26,6 +26,16 @@
 let player, sensor;
 let playerImg;
 
+// --- DEBUG MENU ---
+let debugOpen = false;
+let debugIndex = 0;
+const DEBUG_ITEMS = [
+  { label: "Show Boar Probes", key: "showProbes", value: false },
+  { label: "Show Collision Boxes", key: "showColliders", value: false },
+  { label: "Player Invincible", key: "invincible", value: false },
+  { label: "Win Condition = 1", key: "easyWin", value: false },
+];
+
 // --- SOUNDS ---
 // Audio elements live in index.html as <audio id="snd..."> tags.
 let sndBackground, sndAttack, sndJump, sndCollect, sndDamage;
@@ -293,6 +303,22 @@ function setup() {
 function draw() {
   background(69, 61, 79);
 
+  // backtick toggles debug menu
+  if (kb.presses("`")) {
+    debugOpen = !debugOpen;
+    debugIndex = 0;
+  }
+
+  // apply debug flags every frame
+  if (DEBUG_ITEMS[2].value) invulnTimer = INVULN_FRAMES; // invincible
+  allSprites.debug = DEBUG_ITEMS[1].value; // collision boxes
+  for (const e of boar) {
+    if (!e.footProbe || !e.frontProbe || !e.groundProbe) continue;
+    e.footProbe.visible = DEBUG_ITEMS[0].value;
+    e.frontProbe.visible = DEBUG_ITEMS[0].value;
+    e.groundProbe.visible = DEBUG_ITEMS[0].value;
+  }
+
   // start background music on first user interaction
   if (!bgStarted && kb.pressing()) {
     startBgMusic();
@@ -515,6 +541,8 @@ function draw() {
   if (dead) drawDeathOverlay();
   if (won) drawWinOverlay();
 
+  if (debugOpen) drawDebugMenu();
+
   // accept R to restart the game if player wins or dies
   if ((dead || won) && kb.presses("r")) restartGame();
 }
@@ -614,9 +642,9 @@ function rescueLeaf(player, leaf) {
   playFX(sndCollect);
 
   // win condition
-  if (score >= WIN_SCORE) {
+  const winTarget = DEBUG_ITEMS[3].value ? 1 : WIN_SCORE;
+  if (score >= winTarget) {
     won = true;
-    // optional: freeze player immediately
     player.vel.x = 0;
     player.vel.y = 0;
   }
@@ -928,7 +956,7 @@ function updateBoars() {
     if (e.spawnFreeze > 0) {
       e.spawnFreeze--;
       e.vel.x = 0;
-      e.ani = "run"; // or "throwPose" if you want a “wake up” pose
+      e.ani = "run";
       continue;
     }
 
@@ -1013,7 +1041,7 @@ function updateBoars() {
       continue;
     }
 
-    // if not grounded, don’t patrol
+    // if not grounded, don't patrol
     if (!grounded) {
       e.ani = "throwPose";
       e.ani.frame = 0;
@@ -1137,15 +1165,13 @@ function restartGame() {
 
     attachBoarProbes(e);
 
-    // if you ever decide to store dir in boarSpawns later, use that here.
-    // for now: random, then fix
     e.dir = random([-1, 1]);
     boar.add(e);
     fixSpawnEdgeCase(e);
 
     e.spawnFreeze = 1; // freeze AI movement for 1 frame
     updateBoarProbes(e);
-    updateGroundProbe(e); // if you added this helper
+    updateGroundProbe(e);
     e.vel.x = 0;
 
     e.wasDanger = false;
@@ -1281,7 +1307,7 @@ function makeWorld() {
   // make fire overlap-only (hazard, not solid)
   for (const s of fire) {
     s.collider = "static";
-    s.sensor = true; // if supported by your p5play build
+    s.sensor = true;
   }
 
   // --- BOAR SETUP ---
@@ -1332,4 +1358,55 @@ function makeWorld() {
     { img: bgMidImg, speed: 0.4 },
     { img: bgForeImg, speed: 0.6 },
   ];
+}
+
+// --- DEBUG MENU ---
+function keyPressed() {
+  if (!debugOpen) return;
+  const n = DEBUG_ITEMS.length;
+  if (keyCode === UP_ARROW) debugIndex = (debugIndex - 1 + n) % n;
+  if (keyCode === DOWN_ARROW) debugIndex = (debugIndex + 1) % n;
+  if (keyCode === ENTER || keyCode === RETURN) {
+    DEBUG_ITEMS[debugIndex].value = !DEBUG_ITEMS[debugIndex].value;
+  }
+}
+
+function drawDebugMenu() {
+  camera.off();
+  drawingContext.imageSmoothingEnabled = false;
+
+  const PAD = 6;
+  const ROW = GLYPH_H + 5;
+  const W = 150;
+  const H = PAD * 2 + DEBUG_ITEMS.length * ROW + ROW; // +ROW for title
+  const X = Math.round((VIEWW - W) / 2);
+  const Y = Math.round((VIEWH - H) / 2);
+
+  // semi-transparent panel
+  push();
+  noStroke();
+  fill(0, 0, 0, 160);
+  rect(X, Y, W, H, 3);
+  pop();
+
+  // title
+  drawOutlinedTextToGfx(window, "DEBUG MENU", X + PAD, Y + PAD, "#ffdc00");
+
+  // items
+  for (let i = 0; i < DEBUG_ITEMS.length; i++) {
+    const item = DEBUG_ITEMS[i];
+    const iy = Y + PAD + ROW + i * ROW;
+    const cursor = i === debugIndex ? ">" : " ";
+    const check = item.value ? "[X]" : "[ ]";
+    const color = i === debugIndex ? "#ffffff" : "#aaaaaa";
+    drawOutlinedTextToGfx(
+      window,
+      `${cursor}${check} ${item.label}`,
+      X + PAD,
+      iy,
+      color,
+    );
+  }
+
+  camera.on();
 }
