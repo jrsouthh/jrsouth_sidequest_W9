@@ -304,7 +304,7 @@ function draw() {
   background(69, 61, 79);
 
   // backtick toggles debug menu
-  if (kb.presses("`")) {
+  if (kb.presses("/")) {
     debugOpen = !debugOpen;
     debugIndex = 0;
   }
